@@ -1,10 +1,15 @@
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
+  APP_CONTAINER_PORT: 80
+  LB_INGRESS: "a589556580f43438ebb28237dd57e3a7-1637109807.us-east-1.elb.amazonaws.com"
 
 stages:
   - build
   - push
+  - manifest_app
+  - deploy_app
+  - record
 
 build:
   stage: build
@@ -30,7 +35,51 @@ push:
   before_script:
     - docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
   script:
-    - docker build -t rregistry.gitlab.com/estabilis/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA} .
+    - docker build -t registry.gitlab.com/estabilis/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA} .
     - docker push registry.gitlab.com/estabilis/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
   dependencies:
     - build
+
+manifest_app:
+  stage: manifest_app
+  script:
+    - ./scripts/create-manifest.sh
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME"
+    paths:
+      - k8s-manifest.yml
+    expire_in: 1 week
+
+deploy_app:
+  image: lachlanevenson/k8s-kubectl:latest
+  stage: deploy_app
+  script:
+    - kubectl delete secret ${CI_PROJECT_NAME} --namespace=default --ignore-not-found
+    - kubectl create secret docker-registry ${CI_PROJECT_NAME} --docker-server=registry.gitlab.com --docker-username=${REGISTRY_USER} --docker-password=${REGISTRY_TOKEN} --namespace=default
+    - kubectl apply -f k8s-manifest.yml
+  dependencies:
+    - manifest_app
+  #when: manual
+  tags:
+    - cluster
+    - kubernetes
+
+record:
+  stage: record
+  cache: {}
+  image: docker:latest
+  services:
+    - name: docker:dind
+      entrypoint: ["env", "-u", "DOCKER_HOST"]
+      command: ["dockerd-entrypoint.sh"]
+  before_script:
+    - docker pull amazon/aws-cli:latest
+    - alias aws='docker run --rm -i -v ~/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli'
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  script: |
+    aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch '{ "Comment": "Testing creating a record set", "Changes": [ { "Action": "UPSERT", "ResourceRecordSet": { "Name": "'${CI_PROJECT_NAME}'.estabil.is", "Type": "CNAME", "TTL": 300, "ResourceRecords": [ { "Value": "'${LB_INGRESS}'" } ] } } ] }'
+  environment:
+    name: production
+    url: https://${CI_PROJECT_NAME}.estabil.is
+  when: manual
