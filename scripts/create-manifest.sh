@@ -22,7 +22,7 @@ spec:
       - name: ${CI_PROJECT_NAME}
         image: registry.gitlab.com/estabilis/gitlab-day/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
         ports:
-        - containerPort: 80
+        - containerPort: ${APP_CONTAINER_PORT}
       imagePullSecrets:
         - name: ${CI_PROJECT_NAME}
 ---

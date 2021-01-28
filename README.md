@@ -30,6 +30,7 @@
 - `HOSTED_ZONE_ID` = ID da zona que o dominio esta configurado [documentação](https://docs.aws.amazon.com/pt_br/Route53/latest/DeveloperGuide/ListInfoOnHostedZone.html "documentação").
 - `AWS_ACCESS_KEY_ID` = Contendo o ID do usuario `IAM` com policy de gerencia do `Route53`.
 - `AWS_SECRET_ACCESS_KEY` = Contendo a Secret key do usuario IAM.
+- `APP_CONTAINER_PORT` = Contendo porta exposta pela aplicacao no container.
 
 # Estrutura proposta
 

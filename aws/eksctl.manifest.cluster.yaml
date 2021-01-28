@@ -1,0 +1,65 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: "eks-bootcamp"
+  region: "us-east-1"
+  tags: {
+    environment: "Homolog",
+    EnvironmentType: "HML",
+    project: "gitlabDay",
+  }
+
+vpc: 
+  subnets:
+    public:
+      us-east-1a: { id: subnet-0fae7425c23352e27 }
+      us-east-1b: { id: subnet-032d81df15b25cca2 }
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+
+nodeGroups:
+  - name: eks-bootcamp-2vcpu-8gb-spot
+    instanceType: mixed
+    availabilityZones: ["us-east-1a", "us-east-1b"]
+    privateNetworking: false
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 4
+    volumeSize: 10
+    volumeType: 'gp2'
+    volumeEncrypted: true
+    instancesDistribution:
+      maxPrice: 0.062
+      instanceTypes: ["t3a.large", "m6g.large", "t3.large", "m5a.large", "m5.large", "m4.large"]
+      onDemandBaseCapacity: 0
+      onDemandPercentageAboveBaseCapacity: 0
+      spotAllocationStrategy: capacity-optimized
+    labels:
+      intent: 'apps'
+      lifecycle: 'Ec2Spot'
+      aws.amazon.com/spot: 'true'
+    taints:
+      spotInstance: 'true:PreferNoSchedule'
+    tags:
+      Name: 'eks-bootcamp-2vcpu-8gb-spot'
+      K8s.io/cluster-autoscaler/enabled: 'true'
+      Kubernetes.io/cluster/eks-bootcamp: 'owned'
+      K8s.io/cluster-autoscaler/node-template/label/lifecycle: 'Ec2Spot'
+      K8s.io/cluster-autoscaler/node-template/taint/spotInstance: 'true:PreferNoSchedule'
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        albIngress: true
+        cloudWatch: true
+        ebs: true
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+    ssh:
+      allow: true
+      publicKeyName: 'estabilis-bootcamp'
