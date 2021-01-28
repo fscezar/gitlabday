@@ -3,6 +3,7 @@
 ![angular/cli](https://img.shields.io/badge/angular--cli-blueviolet?style=flat-square)
 ![aws cli](https://img.shields.io/badge/aws--cli-1.18.134-yellow?style=flat-square)
 ![kubectl](https://img.shields.io/badge/kubectl-1.19.3-blue?style=flat-square)
+![eksctl](https://img.shields.io/badge/eksctl-0.28.1-blue?style=flat-square)
 ![aws iam](https://img.shields.io/badge/aws-iam-pourple?style=flat-square)
 ![ingress controller](https://img.shields.io/badge/ingress--controller-nginx-green?style=flat-square)
 ![prometheus](https://img.shields.io/badge/prometheus-latest-red?style=flat-square)
@@ -21,6 +22,7 @@
 - aws cli instalado [documentação](https://docs.aws.amazon.com/pt_br/cli/latest/userguide/cli-chap-install.html "documentação");
 - aws cli configurado [documentação](https://docs.aws.amazon.com/pt_br/cli/latest/userguide/cli-configure-quickstart.html "documentação");
 - kubectl instalado [documentação](https://docs.aws.amazon.com/pt_br/eks/latest/userguide/install-kubectl.html "documentação").
+- eksctl instalado [documentação](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html "documentação").
 
 ## Quais variaveis não posso me esquecer de configurar?
 *Criando Variables no projeto: [documentação](https://docs.gitlab.com/ee/ci/variables/README.html "documentação").*
