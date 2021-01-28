@@ -11,7 +11,7 @@ build:
   image: node
   before_script:
     - npm intall -g @angular/cli
-  sicript:
+  script:
     - ng new app
     - cd app && npm run build --prod
   artifacts:
