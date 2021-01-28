@@ -4,3 +4,33 @@ variables:
 
 stages:
   - build
+  # - push
+
+build:
+  stage: build
+  image: node
+  before_script:
+    - npm intall -g @angular/cli
+  sicript:
+    - ng new app
+    - cd app && npm run build --prod
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME"
+    paths:
+      - app/
+    expire_in: 1 week
+
+# push:
+#   stage: push
+#   image: docker:latest
+#   service: 
+#     - name: docker:dind
+#       etrypoint: ["env", "-u", "DOCKER_HOST"]
+#       command: ["dockerd-entrypoint.sh"]
+#   before_script:
+#     - docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+#   script: 
+#     - docker build -t registry.gitlab.com/estabilis/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA} .
+#     - docker push registry.gitlab.com/estabilis/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
+#   dependencies:
+#     - build
